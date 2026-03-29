@@ -1,0 +1,19 @@
+# Env
+.env
+.env.*
+!.env.example
+
+# Go
+/example-worker
+*.exe
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/

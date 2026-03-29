@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_02x0jxy" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:process id="Application-1" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_06khz1q</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Activity_09bzoco" name="Обработать заявку на кредит">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="application" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1odstcb</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mejc9g</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_1tfacgd">
+      <bpmn:incoming>Flow_0mejc9g</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0mejc9g" sourceRef="Activity_09bzoco" targetRef="Event_1tfacgd" />
+    <bpmn:exclusiveGateway id="Gateway_00is06x" name="Cумма меньше 5000?" default="Flow_1odstcb">
+      <bpmn:incoming>Flow_06khz1q</bpmn:incoming>
+      <bpmn:outgoing>Flow_1odstcb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1bof6qy</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_06khz1q" sourceRef="StartEvent_1" targetRef="Gateway_00is06x" />
+    <bpmn:sequenceFlow id="Flow_1odstcb" name="&#62;=5000" sourceRef="Gateway_00is06x" targetRef="Activity_09bzoco" />
+    <bpmn:sequenceFlow id="Flow_1bof6qy" name="&#60;5000" sourceRef="Gateway_00is06x" targetRef="Activity_146cx7s">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=amount&lt;5000</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_146cx7s">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="decision" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1bof6qy</bpmn:incoming>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Application-1">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_00is06x_di" bpmnElement="Gateway_00is06x" isMarkerVisible="true">
+        <dc:Bounds x="315" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="301" y="65" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0y3yqoz_di" bpmnElement="Activity_09bzoco">
+        <dc:Bounds x="620" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0d2m5v6_di" bpmnElement="Activity_146cx7s">
+        <dc:Bounds x="620" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1tfacgd_di" bpmnElement="Event_1tfacgd">
+        <dc:Bounds x="982" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0mejc9g_di" bpmnElement="Flow_0mejc9g">
+        <di:waypoint x="720" y="120" />
+        <di:waypoint x="982" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06khz1q_di" bpmnElement="Flow_06khz1q">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="315" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1odstcb_di" bpmnElement="Flow_1odstcb">
+        <di:waypoint x="365" y="120" />
+        <di:waypoint x="620" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="474" y="102" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bof6qy_di" bpmnElement="Flow_1bof6qy">
+        <di:waypoint x="340" y="145" />
+        <di:waypoint x="340" y="270" />
+        <di:waypoint x="620" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="340" y="205" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
