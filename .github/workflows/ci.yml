@@ -1,0 +1,61 @@
+# Validates that tutorial workers and examples still compile on default branches.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go-worker:
+    name: Go (zeebe-tutorial)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zeebe-tutorial
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+          cache-dependency-path: zeebe-tutorial/go.sum
+      - name: Verify and analyze
+        run: |
+          go mod verify
+          go vet ./...
+      - name: Build
+        run: go build -buildvcs=false -o /tmp/example-worker ./cmd/example-worker
+
+  python-workers:
+    name: Python (example workers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Byte-compile
+        run: |
+          python3 -m compileall -q \
+            kubernetes/echo-demo-worker/app \
+            kubernetes/form-log-worker/app \
+            zeebe-tutorial/python/example-zeebe-worker/app
+
+  java-worker:
+    name: Java (kubernetes demo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: kubernetes/java-example-worker/pom.xml
+      - name: Package
+        run: mvn -B -q -f kubernetes/java-example-worker/pom.xml package -DskipTests

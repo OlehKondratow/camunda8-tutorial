@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "text": "# Uruchomienie workera\n\nWybierz **job type** — zostanie utworzona jedna service task tego typu. Pola **Imię** i **Kwota** są potrzebne dla **c8jw-golang** (dla pozostałych można zostawić wartości domyślne).",
+      "text": "# Запуск воркера\n\nВыберите **job type** — будет создана одна service task с этим типом. Поля **Имя** и **Сумма** нужны для **c8jw-golang** (остальным можно оставить значения по умолчанию).",
       "type": "text",
       "layout": {
         "row": "Row_intro",
@@ -10,7 +10,7 @@
       "id": "Text_intro"
     },
     {
-      "label": "Worker (job type)",
+      "label": "Воркер (job type)",
       "type": "select",
       "layout": {
         "row": "Row_worker",
@@ -27,7 +27,7 @@
           "value": "c8jw-python"
         },
         {
-          "label": "Go — decyzja (c8jw-golang)",
+          "label": "Go — decision (c8jw-golang)",
           "value": "c8jw-golang"
         },
         {
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "label": "Imię (dla c8jw-golang)",
+      "label": "Имя (для c8jw-golang)",
       "type": "textfield",
       "layout": {
         "row": "Row_name",
@@ -52,7 +52,7 @@
       "defaultValue": "Demo"
     },
     {
-      "label": "Kwota (dla c8jw-golang)",
+      "label": "Сумма (для c8jw-golang)",
       "type": "number",
       "layout": {
         "row": "Row_amount",

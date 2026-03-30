@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "text": "# Wynik\n\nWartości pochodzą ze **zmiennych procesu** po zakończeniu workera (różne workery wypełniają różne pola).",
+      "text": "# Результат\n\nЗначения подставляются из **переменных процесса** после завершения воркера (разные воркеры заполняют разные поля).",
       "type": "text",
       "layout": {
         "row": "Row_header",
@@ -10,7 +10,7 @@
       "id": "Text_result_header"
     },
     {
-      "label": "Job type (z formularza)",
+      "label": "Job type (из формы)",
       "type": "textfield",
       "layout": {
         "row": "Row_jt",
@@ -21,7 +21,7 @@
       "disabled": true
     },
     {
-      "label": "Komunikat (message)",
+      "label": "Сообщение (message)",
       "type": "textfield",
       "layout": {
         "row": "Row_msg",
@@ -32,7 +32,7 @@
       "disabled": true
     },
     {
-      "label": "Worker (pole worker)",
+      "label": "Worker (поле worker)",
       "type": "textfield",
       "layout": {
         "row": "Row_worker_field",
@@ -65,7 +65,7 @@
       "disabled": true
     },
     {
-      "label": "OK (przykład Python)",
+      "label": "OK (Python example-task)",
       "type": "textfield",
       "layout": {
         "row": "Row_ok",

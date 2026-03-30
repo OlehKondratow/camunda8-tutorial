@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "label": "Imię",
+      "label": "Имя",
       "type": "textfield",
       "layout": {
         "row": "Row_1krmhm3",
@@ -11,7 +11,7 @@
       "key": "name"
     },
     {
-      "label": "Kwota kredytu",
+      "label": "Сумма кредита",
       "type": "number",
       "layout": {
         "row": "Row_1krmhm3",
@@ -21,7 +21,7 @@
       "key": "amount"
     },
     {
-      "label": "Decyzja kredytowa",
+      "label": "Решение по кредиту",
       "type": "checkbox",
       "layout": {
         "row": "Row_18tey2o",

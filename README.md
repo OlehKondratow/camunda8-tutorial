@@ -1,46 +1,85 @@
 # Camunda 8 — repozytorium szkoleniowe
 
-Samodzielny zestaw do ćwiczeń: **Zeebe job workers** (Go i Python), przykładowe BPMN, formularz, Docker Compose, ściąga **GKE**.
+[![CI](https://github.com/OlehKondratow/camunda8-tutorial/actions/workflows/ci.yml/badge.svg)](https://github.com/OlehKondratow/camunda8-tutorial/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Go](https://img.shields.io/github/go-mod/go-version/OlehKondratow/camunda8-tutorial?filename=zeebe-tutorial%2Fgo.mod)](zeebe-tutorial/go.mod)
 
-**Repozytorium:** [github.com/OlehKondratow/camunda8-tutorial](https://github.com/OlehKondratow/camunda8-tutorial)
+**Cel:** materiał praktyczny do Camundy **8** — **Zeebe job workers** (gRPC), BPMN/DMN/formularze, lokalny **Docker Compose** oraz ścieżka do **GKE** i **Cloud Build** (bez zastępowania oficjalnej dokumentacji Camundy).
 
-Może równolegle służyć jako **materiał referencyjny do portfolio** (Camunda 8, Zeebe, Kubernetes); treść poniżej ma wyłącznie charakter **techniczny**.
+Repozytorium nadaje się jako **referencja techniczna** (portfolio, onboarding zespołu). To **nie** produkcyjna dystrybucja platformy; parametry bezpieczeństwa są uproszczone pod lab — zob. [SECURITY.md](SECURITY.md).
 
-## Zakres techniczny
+**Źródło:** [github.com/OlehKondratow/camunda8-tutorial](https://github.com/OlehKondratow/camunda8-tutorial)
 
-- **Camunda 8 / Zeebe** (w odróżnieniu od Camunda 7): orchestracja przez **job workers** (gRPC), nie przez osadzony silnik w aplikacji.
-- **BPMN** w Modelerze; wykonanie i monitoring po stronie platformy (**Operate**, **Tasklist**).
-- **Service Task → job type** (`c8jw-*`): aktywacja joba, **complete** z **variables**; spójne nazewnictwo obrazu, StatefulSet w Kubernetes i typu zadania w BPMN.
-- Przykład **formularz + DMN + BPMN** (end-to-end): `zeebe-tutorial/bpmn-and-dmn-bundles.md`, proces **`c8jw_credit_orchestration`**.
-- Workery w **Go**, **Python** i **Java** — jeden protokół Zeebe, różne środowiska uruchomieniowe.
-- **Obrazy** w **Artifact Registry**, build w **Cloud Build**, wdrożenie workerów w **GKE** (`kubernetes/`, `ci/`).
-- **Docker Compose** — lokalny Zeebe i workery bez klastra.
+## Spis treści
 
-Typowy scenariusz weryfikacji: uruchomienie Zeebe i workera → wdrożenie procesu → start instancji w **Operate** → wykonanie joba → zmienne procesu i kolejny krok na diagramie.
+- [Model logiczny](#model-logiczny)
+- [Wymagania](#wymagania)
+- [Struktura repozytorium](#struktura-repozytorium)
+- [Szybki start (lokalnie)](#szybki-start-lokalnie)
+- [Proces i narzędzia operatorskie](#proces-i-narzędzia-operatorskie)
+- [Chmura (GCP / GKE)](#chmura-gcp--gke)
+- [Powiązane projekty](#powiązane-projekty)
+- [Kontrybucja i polityki](#kontrybucja-i-polityki)
 
-Diagram z **dwoma job types** pod rząd: `zeebe-tutorial/bpmn/examples/portfolio-pipeline.bpmn` (process id **`c8jw-portfolio-pipeline`**). Przy tworzeniu instancji podaj zmienne, np. `{"name":"Alice","amount":1500}` — w przeciwnym razie krok **c8jw-golang** zwróci błąd (implementacja: `zeebe-tutorial/internal/tutorial/decision_task.go`).
+## Model logiczny
 
-## Struktura
+```mermaid
+flowchart LR
+  subgraph client["Warstwa wykonania"]
+    M[Modeler / CI — deploy BPMN DMN Forms]
+    O[Operate / Tasklist]
+  end
+  subgraph zeebe["Zeebe"]
+    G[Gateway gRPC]
+  end
+  subgraph workers["Job workers (tutorial)"]
+    W1[Go / Python / Java]
+    W2[K8s StatefulSets]
+  end
+  M --> G
+  O --> G
+  G <--> W1
+  G <--> W2
+```
+
+- **Camunda 8 / Zeebe** (vs Camunda 7): orchestracja przez **zewnętrzne job workers**, nie przez „silnik w JVM aplikacji”.
+- **Service Task** mapuje na **job type** (`c8jw-*`): worker aktywuje zadanie, wykonuje logikę, **complete** ze **zmiennymi** — te same nazwy typów w BPMN, Kubernetes i kodzie.
+- **Operate / Tasklist**: podgląd instancji i zadań użytkownika po stronie platformy.
+- **Pełna ścieżka** formularz + DMN + BPMN: [zeebe-tutorial/bpmn-and-dmn-bundles.md](zeebe-tutorial/bpmn-and-dmn-bundles.md), m.in. proces **`c8jw_credit_orchestration`**.
+- **Compose** uruchamia broker + gateway + kontenery workerów; szczegóły w [docker-compose.yaml](docker-compose.yaml).
+
+Typowy scenariusz weryfikacji: Zeebe + worker → deploy procesu → start instancji w **Operate** → job → zmienne i przejście na diagramie.
+
+**Dwa job types pod rząd:** [zeebe-tutorial/bpmn/examples/portfolio-pipeline.bpmn](zeebe-tutorial/bpmn/examples/portfolio-pipeline.bpmn) (`c8jw-portfolio-pipeline`). Przy starcie instancji ustaw zmienne, np. `{"name":"Alice","amount":1500}` — inaczej krok **c8jw-golang** zgłosi błąd (logika: [zeebe-tutorial/internal/tutorial/decision_task.go](zeebe-tutorial/internal/tutorial/decision_task.go)).
+
+## Wymagania
+
+| Komponent | Wersja / uwagi |
+|-----------|----------------|
+| Docker / Podman | Compose v2 do lokalnego stacku |
+| Go | 1.21+ — worker w `zeebe-tutorial/` |
+| Python | 3.12 — przykłady w `kubernetes/*-demo-worker/`, `zeebe-tutorial/python/` |
+| Java | 21 — `kubernetes/java-example-worker` (Maven) |
+| GCP (opcjonalnie) | `gcloud`, dostęp do GKE, Artifact Registry — [docs](docs/gke-camunda-cheatsheet.md) |
+
+Zmienne środowiskowe Go workera: szablon [zeebe-tutorial/.env.example](zeebe-tutorial/.env.example).
+
+## Struktura repozytorium
 
 | Ścieżka | Rola |
 |---------|------|
-| `zeebe-tutorial/` | Workery `c8jw-*`; formularze+BPMN: **`bpmn-and-dmn-bundles.md`**; kredyt: **credit-orchestration** + **credit-route.dmn** + **c8jw-demo-application.form**; **złożone DRG:** **complex-decision-tree.dmn** + **dmn-complex-tree-demo.bpmn** (`c8jw_dmn_complex_tree_demo`); wybór workera: **worker-picker-orchestration.bpmn**, **c8jw-worker-*.form**; także `example-task-process`, **portfolio-pipeline** |
-| `images/operate/` | Zrzuty ekranu **Camunda Operate** |
-| `images/modeler/` | Zrzuty **Camunda Modeler** |
-| `docker-compose.yaml` | Lokalny **Zeebe 8.5** + oba workery |
-| `docs/gke-camunda-cheatsheet.md` | GKE, Helm, port-forward, PVC, sprzątanie |
-| `docs/service-tasks-and-gateways-reunico.md` | Service tasks / bramy (Reunico) |
-| `examples/application.form` | Przykładowy formularz (Camunda) |
-| ~~`credit-scoring-camunda/`~~ | **Przeniesiony** poza to repozytorium — osobny katalog roboczy (np. `/data/projects/credit-scoring-camunda` obok tego klona). Pełna dokumentacja w `README.md` tamże. |
-| `examples/diagram_1.bpmn` | Dodatkowy diagram |
-| `helm/` | Values Camunda: przykład **`camunda-platform-user-values.yaml`**, eksport z klastra — `helm/README.md`, `scripts/fetch-helm-values.sh` |
-| `kubernetes/` | Kilka szkoleniowych **job workers** dla GKE (zob. `kubernetes/README.md`) |
-| `ci/cloudbuild-workers.yaml` | Cloud Build: wszystkie obrazy workerów → Artifact Registry |
-| `scripts/deploy-workers-to-gke.sh` | Wdrożenie workerów w namespace `c8-tutorial-workers` |
+| `zeebe-tutorial/` | Worker Go (`cmd/example-worker`), formularze i BPMN; przewodnik zbiorczy: **`bpmn-and-dmn-bundles.md`**; m.in. credit orchestration, DMN `complex-decision-tree`, worker-picker |
+| `docker-compose.yaml` | Lokalny **Zeebe 8.5** + worker images |
+| `kubernetes/` | StatefulSet’y szkoleniowych workerów ([kubernetes/README.md](kubernetes/README.md)) |
+| `ci/cloudbuild-workers.yaml` | Cloud Build → Artifact Registry |
+| `scripts/deploy-workers-to-gke.sh` | Wdrożenie do namespace `c8-tutorial-workers` |
+| `helm/` | Wartości użytkownika Camundy + [helm/README.md](helm/README.md), `scripts/fetch-helm-values.sh` |
+| `docs/gke-camunda-cheatsheet.md` | GKE, Helm, port-forward, PVC |
+| `docs/service-tasks-and-gateways-reunico.md` | Service tasks / bramy |
+| `examples/` | Dodatkowy BPMN, przykładowy formularz |
+| ~~`credit-scoring-camunda/`~~ | **Wyłączone z tego klonu** — osobne repozytorium / katalog (np. ML + Python workers); dokumentacja u źródła projektu |
 
 ## Szybki start (lokalnie)
-
-Wymagania: Docker lub Podman Compose; opcjonalnie Go 1.21+, Python 3.12.
 
 ```bash
 git clone https://github.com/OlehKondratow/camunda8-tutorial.git
@@ -48,22 +87,45 @@ cd camunda8-tutorial
 docker compose up --build
 ```
 
-Brama: **localhost:26500**. Workery nasłuchują **`c8jw-golang`** i **`c8jw-python`**.
+- Gateway gRPC: **`127.0.0.1:26500`** (plaintext w labie).
+- Domyślnie nasłuchują typy **`c8jw-golang`** i **`c8jw-python`**.
 
-- **Go:** `cd zeebe-tutorial && export ZEEBE_ADDRESS=127.0.0.1:26500 && go run ./cmd/example-worker`  
-  Zmienna **`JOB_TYPES`** (po przecinku), np. `JOB_TYPES=c8jw-golang`.
-- **Python:** `zeebe-tutorial/python/example-zeebe-worker/README.md`
+**Worker Go z hosta** (zamiast kontenera):
 
-BPMN: **`zeebe-tutorial/bpmn/examples/example-task.bpmn`** (`example-task-process`) oraz łańcuch **Python → Golang** — **`portfolio-pipeline.bpmn`** (`c8jw-portfolio-pipeline`). Proces z kursu — **`examples/diagram_1.bpmn`** / Modeler (gałąź automatycznej obsługi, Type **`c8jw-golang`**) ewentualnie wdrożyć osobno.
+```bash
+cd zeebe-tutorial
+cp -n .env.example .env   # opcjonalnie; wyeksportuj ZEEBE_ADDRESS
+export ZEEBE_ADDRESS=127.0.0.1:26500
+go run ./cmd/example-worker
+```
 
-W **Modeler** w Service Task pole **Type** musi być zgodne ze schemą **`c8jw-*`** w `kubernetes/README.md`. **Process ID** nie jest powiązany z wdrożeniem workera.
+Opcja **`JOB_TYPES`** (comma-separated), np. `JOB_TYPES=c8jw-golang` — zob. [zeebe-tutorial/cmd/example-worker/main.go](zeebe-tutorial/cmd/example-worker/main.go).
 
-## Chmura
+**Worker Python:** [zeebe-tutorial/python/example-zeebe-worker/README.md](zeebe-tutorial/python/example-zeebe-worker/README.md).
 
-- Ściąga: **`docs/gke-camunda-cheatsheet.md`**
-- Build obrazów: `gcloud builds submit --config=ci/cloudbuild-workers.yaml --project=my-camunda8-project .`
-- Wdrożenie do klastra: `./scripts/deploy-workers-to-gke.sh` (potrzebne repozytorium **`c8-tutorial-docker`** w Artifact Registry — zob. `kubernetes/README.md`)
+**Przykładowe BPMN:** [zeebe-tutorial/bpmn/examples/example-task.bpmn](zeebe-tutorial/bpmn/examples/example-task.bpmn) (`example-task-process`), łańcuch **Python → Go:** [portfolio-pipeline.bpmn](zeebe-tutorial/bpmn/examples/portfolio-pipeline.bpmn). Diagram z kursu / szkolenia: [examples/diagram_1.bpmn](examples/diagram_1.bpmn) — ewentualnie wdrożyć ręcznie w Modelerze (Type **`c8jw-golang`** na gałęzi automatycznej).
 
-## Licencja
+W **Modelerze** pole **Type** w Service Task musi być zgodne z konwencją **`c8jw-*`** z [kubernetes/README.md](kubernetes/README.md). **Process ID** jest niezależny od wdrożenia konkretnego obrazu workera.
 
-MIT — zob. `LICENSE`.
+## Proces i narzędzia operatorskie
+
+1. Wdróż **BPMN** (i ewentualnie **DMN**, **formularze**) — Modeler lub pipeline.
+2. Upewnij się, że worker (Compose / pod / binarka) ma aktywny **job type** z diagramu.
+3. Uruchom instancję procesu, w Operate sprawdź postęp i zmienne.
+4. Dla scenariuszy z formularzem użytkownika — **Tasklist** i powiązany **formKey**.
+
+## Chmura (GCP / GKE)
+
+- Ściąga operacyjna: [docs/gke-camunda-cheatsheet.md](docs/gke-camunda-cheatsheet.md)
+- Build obrazów: `gcloud builds submit --config=ci/cloudbuild-workers.yaml --project=<PROJECT_ID> .`
+- Wdrożenie workerów: `./scripts/deploy-workers-to-gke.sh` — repozytorium obrazów i IAM: [kubernetes/README.md](kubernetes/README.md)
+
+## Powiązane projekty
+
+- **Credit scoring + Camunda 8** (wyodrębniony szkielet: regresja logistyczna, workery Python, BPMN/DMN) — utrzymywany poza tym repozytorium; po sklonowaniu dodaj sąsiedni katalog według własnej konwencji.
+
+## Kontrybucja i polityki
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — jak przygotować PR (lokalne odpowiedniki CI).
+- [SECURITY.md](SECURITY.md) — scope labu i zgłaszanie problemów.
+- **Licencja:** [LICENSE](LICENSE) (MIT).
