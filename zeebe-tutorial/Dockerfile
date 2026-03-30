@@ -1,4 +1,4 @@
-# Сборка example-worker (Go). Контекст — корень zeebe-tutorial.
+# Build example-worker (Go). Kontekst — katalog główny zeebe-tutorial.
 FROM golang:1.21-bookworm AS build
 WORKDIR /src
 COPY go.mod ./

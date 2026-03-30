@@ -4,7 +4,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_06khz1q</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="Activity_09bzoco" name="Обработать заявку на кредит">
+    <bpmn:userTask id="Activity_09bzoco" name="Obsłużyć wniosek kredytowy">
       <bpmn:extensionElements>
         <zeebe:userTask />
         <zeebe:formDefinition formId="application" />
@@ -16,7 +16,7 @@
       <bpmn:incoming>Flow_0mejc9g</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0mejc9g" sourceRef="Activity_09bzoco" targetRef="Event_1tfacgd" />
-    <bpmn:exclusiveGateway id="Gateway_00is06x" name="Cумма меньше 5000?" default="Flow_1odstcb">
+    <bpmn:exclusiveGateway id="Gateway_00is06x" name="Kwota mniejsza niż 5000?" default="Flow_1odstcb">
       <bpmn:incoming>Flow_06khz1q</bpmn:incoming>
       <bpmn:outgoing>Flow_1odstcb</bpmn:outgoing>
       <bpmn:outgoing>Flow_1bof6qy</bpmn:outgoing>
@@ -28,7 +28,7 @@
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Activity_146cx7s">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="decision" />
+        <zeebe:taskDefinition type="c8jw-golang" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1bof6qy</bpmn:incoming>
     </bpmn:serviceTask>

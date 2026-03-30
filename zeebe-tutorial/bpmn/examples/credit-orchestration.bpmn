@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_c8jw_credit" targetNamespace="http://camunda8.tutorial/schema/bpmn" exporter="camunda8-tutorial" exporterVersion="1.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:process id="c8jw_credit_orchestration" name="Credit: Form → DMN → workers" isExecutable="true">
+    <bpmn:documentation>Сквозной демо-процесс: форма **c8jw_demo_application**, DMN **credit_route_decision** (FEEL: сумма &lt; 5000 → **auto**, иначе **manual**). Результат в переменной **creditRoute** (строка). Ветка **auto** → **c8jw-golang** (нужны name и amount); **manual** → **c8jw-python**. Деплойте form + dmn + BPMN; **bindingType latest** позволяет сначала выложить DMN, затем процесс.</bpmn:documentation>
+    <bpmn:startEvent id="StartEvent_credit" name="Start">
+      <bpmn:outgoing>Flow_to_form</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask_application" name="Данные заявки">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="c8jw_demo_application" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_form</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_dmn</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_to_form" sourceRef="StartEvent_credit" targetRef="UserTask_application" />
+    <bpmn:businessRuleTask id="Task_evaluate_route" name="DMN: маршрут по сумме">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="credit_route_decision" bindingType="latest" resultVariable="creditRoute" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_dmn</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_split</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_to_dmn" sourceRef="UserTask_application" targetRef="Task_evaluate_route" />
+    <bpmn:exclusiveGateway id="Gateway_route_split" name="creditRoute?" default="Flow_to_python">
+      <bpmn:incoming>Flow_to_split</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_golang</bpmn:outgoing>
+      <bpmn:outgoing>Flow_to_python</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_to_split" sourceRef="Task_evaluate_route" targetRef="Gateway_route_split" />
+    <bpmn:sequenceFlow id="Flow_to_golang" name="auto" sourceRef="Gateway_route_split" targetRef="Task_worker_golang">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= creditRoute = "auto"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_to_python" name="manual" sourceRef="Gateway_route_split" targetRef="Task_worker_python" />
+    <bpmn:serviceTask id="Task_worker_golang" name="Worker c8jw-golang">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="c8jw-golang" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_golang</bpmn:incoming>
+      <bpmn:outgoing>Flow_go_join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_worker_python" name="Worker c8jw-python">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="c8jw-python" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_python</bpmn:incoming>
+      <bpmn:outgoing>Flow_py_join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_route_join">
+      <bpmn:incoming>Flow_go_join</bpmn:incoming>
+      <bpmn:incoming>Flow_py_join</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_end</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_go_join" sourceRef="Task_worker_golang" targetRef="Gateway_route_join" />
+    <bpmn:sequenceFlow id="Flow_py_join" sourceRef="Task_worker_python" targetRef="Gateway_route_join" />
+    <bpmn:endEvent id="EndEvent_credit" name="Done">
+      <bpmn:incoming>Flow_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_to_end" sourceRef="Gateway_route_join" targetRef="EndEvent_credit" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_credit">
+    <bpmndi:BPMNPlane id="BPMNPlane_credit" bpmnElement="c8jw_credit_orchestration">
+      <bpmndi:BPMNShape id="Shape_Start_credit" bpmnElement="StartEvent_credit">
+        <dc:Bounds x="152" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_User_credit" bpmnElement="UserTask_application">
+        <dc:Bounds x="240" y="210" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_DMN_credit" bpmnElement="Task_evaluate_route">
+        <dc:Bounds x="410" y="210" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Split_credit" bpmnElement="Gateway_route_split" isMarkerVisible="true">
+        <dc:Bounds x="585" y="225" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="575" y="195" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Go_credit" bpmnElement="Task_worker_golang">
+        <dc:Bounds x="700" y="120" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Py_credit" bpmnElement="Task_worker_python">
+        <dc:Bounds x="700" y="330" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Join_credit" bpmnElement="Gateway_route_join" isMarkerVisible="true">
+        <dc:Bounds x="885" y="225" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_credit" bpmnElement="EndEvent_credit">
+        <dc:Bounds x="1002" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_to_form" bpmnElement="Flow_to_form">
+        <di:waypoint x="188" y="250" />
+        <di:waypoint x="240" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_dmn" bpmnElement="Flow_to_dmn">
+        <di:waypoint x="360" y="250" />
+        <di:waypoint x="410" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_split" bpmnElement="Flow_to_split">
+        <di:waypoint x="530" y="250" />
+        <di:waypoint x="585" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_golang" bpmnElement="Flow_to_golang">
+        <di:waypoint x="610" y="225" />
+        <di:waypoint x="610" y="160" />
+        <di:waypoint x="700" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="616" y="186" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_python" bpmnElement="Flow_to_python">
+        <di:waypoint x="610" y="275" />
+        <di:waypoint x="610" y="370" />
+        <di:waypoint x="700" y="370" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="616" y="318" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_go_join" bpmnElement="Flow_go_join">
+        <di:waypoint x="820" y="160" />
+        <di:waypoint x="910" y="160" />
+        <di:waypoint x="910" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_py_join" bpmnElement="Flow_py_join">
+        <di:waypoint x="820" y="370" />
+        <di:waypoint x="910" y="370" />
+        <di:waypoint x="910" y="275" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_end" bpmnElement="Flow_to_end">
+        <di:waypoint x="935" y="250" />
+        <di:waypoint x="1002" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

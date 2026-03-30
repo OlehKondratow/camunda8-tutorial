@@ -1,81 +1,77 @@
-# Camunda 8: сервисные задачи и шлюзы (конспект)
+# Camunda 8: zadania serwisowe i bramy (notatki)
 
-**Источник:** [Reunico — Видеокурс Camunda 8: Сервисные задачи и шлюзы](https://reunico.com/blog/camunda-8-service-tasks-gateways/)  
-**Дата публикации (на сайте):** 19.12.2024  
-**Автор:** Мстислав Мартынюк  
-**Длительность материала:** ~15 мин (обучающие)
+**Źródło:** [Reunico — Materiał o Service Tasks i Gateway w Camunda 8](https://reunico.com/blog/camunda-8-service-tasks-gateways/)  
+**Data na stronie:** 19.12.2024  
+**Autor:** Mstislav Martyniuk  
+**Czas materiału:** ~15 min (szkoleniowe)
 
-> Практическое задание в оригинале рассчитано на опыт разработки в **Spring Boot** (Spring Zeebe SDK). Иллюстрации и видео — только на странице-источнике.
-
----
-
-## Обзор тем
-
-- Использование **шлюза** в процессе — в примере **Exclusive Gateway** (XOR / «развилка ИЛИ/ИЛИ»).
-- Реализация **сервисных задач (Service Task)** через паттерн **Job Worker**.
-
-Часть цикла «Изучаем Camunda 8 вместе с Reunico»; см. также плейлист на YouTube и соседние статьи на сайте.
+> Ćwiczenie w oryginale zakłada doświadczenie z **Spring Boot** (Spring Zeebe SDK). Ilustracje i wideo — tylko na stronie źródłowej.
 
 ---
 
-## Шлюзы (Gateways)
+## Zakres tematów
 
-Типы по смыслу:
+- Użycie **bramy** w procesie — w przykładzie **Exclusive Gateway** (XOR / „rozgałęzienie LUB/LUB”).
+- Realizacja **Service Task** przez wzorzec **Job Worker**.
 
-- решение по **условию**: Exclusive / Inclusive Gateway;
-- решение по **событию**: Event Gateway;
-- **распараллеливание** и **слияние** потоков: Parallel Gateway.
+Część cyklu „Uczymy się Camunda 8 z Reunico”; zob. też playlistę na YouTube i sąsiednie artykuły.
+
+---
+
+## Bramy (Gateways)
+
+Typy sensownie:
+
+- decyzja wg **warunku**: Exclusive / Inclusive Gateway;
+- decyzja wg **zdarzenia**: Event Gateway;
+- **równoległe rozgałęzienie** i **scalenie**: Parallel Gateway.
 
 ### Exclusive Gateway
 
-При входе токена проверяются **условия на исходящих sequence flow**. В Camunda 8 условия задаются на языке **FEEL** (Friendly Enough Expression Language). Токен идёт по **первому** потоку, для которого условие истинно.
+Przy wejściu tokena sprawdzane są **warunki na wychodzących sequence flow**. W Camunda 8 warunki zapisuje się w **FEEL**. Token idzie **pierwszą** ścieżką, dla której warunek jest prawdziwy.
 
-**Пример из статьи:** переменная `amount` (сумма кредита):
+**Przykład z artykułu:** zmienna `amount` (kwota kredytu):
 
-- если `amount < 5000` — ветка на **сервисную** задачу (автообработка);
-- иначе — ветка на **пользовательскую** задачу.
+- jeśli `amount < 5000` — gałąź do **zadania serwisowego** (autoobsługa);
+- w przeciwnym razie — gałąź do **zadania użytkownika**.
 
-**Default flow (поток по умолчанию):** помечается «гаечным ключом»; срабатывает, если **все остальные** условия ложны. В примере: поток «≥5000» может быть default, поток «<5000» — с условием `amount < 5000`.
-
----
-
-## Сервисные задачи и Job Worker
-
-Camunda 8 оркестрирует не только пользовательские шаги, но и вызовы сервисов/API/систем.
-
-**Service Task** с реализацией **Job Worker**:
-
-1. Выполнение процесса **останавливается** на задаче.
-2. Создаётся **job** заданного **Job type** (тип задачи).
-3. Клиент **Zeebe** (gRPC) забирает job, выполняет бизнес-логику.
-4. После выполнения — **complete** или **fail** (с ошибкой / ретраями).
-
-Реализация воркера: свой клиент Zeebe или SDK (в статье — **Spring Zeebe** для Spring Boot); альтернативно — другие официальные клиенты под свой стек.
+**Default flow:** oznaczany „kluczem”; działa, gdy **wszystkie pozostałe** warunki są fałszywe. W przykładzie: ścieżka „≥5000” może być default, ścieżka „<5000” — z warunkiem `amount < 5000`.
 
 ---
 
-## Практика (кратко по сценарию из статьи)
+## Zadania serwisowe i Job Worker
 
-1. Добавить **Exclusive Gateway** перед задачей «обработать заявку», задать имя шлюза в форме вопроса (например: «Сумма меньше 5000?»).
-2. Исходящим потокам дать имена и условия в FEEL; один поток назначить **default**.
-3. Для ветки автообработки — **Service Task**, задать **Job type** (в примере упоминается `decision` как тип для воркера).
-4. Развернуть процесс в кластер Camunda.
-5. Реализовать **Job Worker** (например, Spring Boot + Spring Zeebe).
-6. Запускать процесс с разными `amount` (например 3000, 10000, 1000) и проверять в **Operate** / **Tasklist**, какая ветка выбрана.
+Camunda 8 orkiestruje nie tylko kroki użytkownika, ale i wywołania usług/API.
 
-Ожидаемое поведение (по тексту статьи):
+**Service Task** z implementacją **Job Worker**:
 
-- при **3000** и **1000** — выполняется автоматическая обработка и процесс идёт по соответствующей ветке;
-- при **10000** — создаётся пользовательская задача в Tasklist;
-- после ручного завершения пользовательской задачи экземпляры можно отследить в Operate.
+1. Wykonywanie procesu **zatrzymuje się** na zadaniu.
+2. Powstaje **job** o danym **Job type**.
+3. Klient **Zeebe** (gRPC) pobiera job i wykonuje logikę.
+4. Po wykonaniu — **complete** lub **fail** (z retry).
+
+Implementacja workera: własny klient Zeebe lub SDK (w artykule — **Spring Zeebe**); alternatywnie inne oficjalne klienty.
 
 ---
 
-## Полезные ссылки с оригинальной страницы
+## Praktyka (krótko wg scenariusza z artykułu)
 
-- Цикл / соседние материалы: «Первый процесс», «User Tasks & Forms», «Введение» — на [reunico.com](https://reunico.com/blog/).
-- Официальная документация Camunda по клиентам Zeebe и Job Workers: [docs.camunda.io](https://docs.camunda.io).
+1. Dodać **Exclusive Gateway** przed zadaniem „obsłuż wniosek”, nazwa bramy jako pytanie (np. „Kwota mniejsza niż 5000?”).
+2. Nadać wychodzącym flow nazwy i warunki FEEL; jeden flow ustawić jako **default**.
+3. Dla gałęzi autoobsługi — **Service Task**, **Job type** (w kursie często `decision`; w tym repozytorium szkoleniowe workery używają **`c8jw-golang`** itd., prefiks **`c8jw-*`** — zob. `kubernetes/README.md`).
+4. Wdrożyć proces do klastra Camunda.
+5. Zaimplementować **Job Worker** (np. Spring Boot + Spring Zeebe).
+6. Uruchamiać proces z różnymi `amount` (np. 3000, 10000, 1000) i sprawdzać w **Operate** / **Tasklist**, która gałąź została wybrana.
+
+Oczekiwane zachowanie (wg tekstu artykułu):
+
+- przy **3000** i **1000** — wykonuje się autoobsługa;
+- przy **10000** — powstaje user task w Tasklist;
+- po ręcznym ukończeniu user task instancje śledzi się w Operate.
 
 ---
 
-*Файл сгенерирован для локального использования; не подлежит коммиту, если каталог `temp/` в `.gitignore`.*
+## Przydatne linki ze strony źródłowej
+
+- Cykl / sąsiednie materiały na [reunico.com](https://reunico.com/blog/).
+- Dokumentacja Camunda o klientach Zeebe i Job Workers: [docs.camunda.io](https://docs.camunda.io).

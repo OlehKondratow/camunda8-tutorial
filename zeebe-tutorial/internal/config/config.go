@@ -11,7 +11,7 @@ import (
 
 const (
 	DefaultAuthorizationServerURL = "https://login.cloud.camunda.io/oauth/token/"
-	DefaultWorkerNamePrefix         = "zeebe-tutorial-worker"
+	DefaultWorkerNamePrefix         = "c8jw-golang"
 )
 
 // Config holds Zeebe client and worker settings.

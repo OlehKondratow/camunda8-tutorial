@@ -12,8 +12,8 @@ import (
 	zjobs "zeebe-tutorial/internal/zeebe"
 )
 
-// JobTypeExampleTask is the Zeebe job type for the minimal tutorial worker (BPMN service task must match).
-const JobTypeExampleTask = "example-task"
+// JobTypeExampleTask — pole Type w Modeler dla minimalnego procesu example-task.bpmn.
+const JobTypeExampleTask = "c8jw-python"
 
 type exampleInput struct {
 	Name string `json:"name"`

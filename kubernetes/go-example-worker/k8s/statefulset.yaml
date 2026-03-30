@@ -1,0 +1,58 @@
+# Golang — job type c8jw-golang. Obraz / StatefulSet / app: c8jw-golang
+apiVersion: v1
+kind: Service
+metadata:
+  name: c8jw-golang-headless
+  namespace: c8-tutorial-workers
+  labels:
+    app: c8jw-golang
+spec:
+  clusterIP: None
+  selector:
+    app: c8jw-golang
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: c8jw-golang
+  namespace: c8-tutorial-workers
+  labels:
+    app: c8jw-golang
+    app.kubernetes.io/component: golang
+spec:
+  serviceName: c8jw-golang-headless
+  replicas: 1
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: c8jw-golang
+  template:
+    metadata:
+      labels:
+        app: c8jw-golang
+        app.kubernetes.io/component: golang
+    spec:
+      containers:
+        - name: worker
+          image: europe-west3-docker.pkg.dev/my-camunda8-project/c8-tutorial-docker/c8jw-golang:latest
+          imagePullPolicy: Always
+          env:
+            - name: ZEEBE_ADDRESS
+              value: camunda-platform-zeebe-gateway.camunda.svc.cluster.local:26500
+            - name: ZEEBE_LOCAL_PLAINTEXT
+              value: "true"
+            - name: JOB_TYPES
+              value: c8jw-golang
+            - name: WORKER_NAME
+              value: c8jw-golang
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

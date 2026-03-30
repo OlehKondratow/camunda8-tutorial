@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_c8jw_complex_tree" name="Complex decision tree (DRG)" namespace="http://camunda8.tutorial/dmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <decision id="risk_level" name="Poziom ryzyka (kwota + scoring)">
+    <decisionTable id="DecisionTable_risk" hitPolicy="FIRST" preferredOrientation="Rule-as-Row">
+      <input id="Input_loanAmount" label="Kwota pożyczki">
+        <inputExpression id="InputExpr_loanAmount" typeRef="number">
+          <text>loanAmount</text>
+        </inputExpression>
+      </input>
+      <input id="Input_creditScore" label="Scoring kredytowy (0–1000)">
+        <inputExpression id="InputExpr_creditScore" typeRef="number">
+          <text>creditScore</text>
+        </inputExpression>
+      </input>
+      <output id="Output_risk" label="Ryzyko" name="band" typeRef="string" />
+      <rule id="Rule_risk_critical">
+        <description>Scoring poniżej progu — krytyczne</description>
+        <inputEntry id="UA_r1a">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UA_r1b">
+          <text>&lt; 550</text>
+        </inputEntry>
+        <outputEntry id="OA_r1">
+          <text>"CRITICAL"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_risk_high_amount">
+        <description>Duża kwota — podwyższone ryzyko operacyjne</description>
+        <inputEntry id="UA_r2a">
+          <text>&gt;= 20000</text>
+        </inputEntry>
+        <inputEntry id="UA_r2b">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="OA_r2">
+          <text>"HIGH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_risk_low">
+        <description>Mała kwota i bardzo dobry scoring</description>
+        <inputEntry id="UA_r3a">
+          <text>&lt; 5000</text>
+        </inputEntry>
+        <inputEntry id="UA_r3b">
+          <text>&gt;= 700</text>
+        </inputEntry>
+        <outputEntry id="OA_r3">
+          <text>"LOW"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_risk_medium_small">
+        <inputEntry id="UA_r4a">
+          <text>&lt; 5000</text>
+        </inputEntry>
+        <inputEntry id="UA_r4b">
+          <text>&gt;= 600</text>
+        </inputEntry>
+        <outputEntry id="OA_r4">
+          <text>"MEDIUM"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_risk_medium_mid">
+        <inputEntry id="UA_r5a">
+          <text>&lt; 20000</text>
+        </inputEntry>
+        <inputEntry id="UA_r5b">
+          <text>&gt;= 680</text>
+        </inputEntry>
+        <outputEntry id="OA_r5">
+          <text>"MEDIUM"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_risk_high_fallback">
+        <inputEntry id="UA_r6a">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UA_r6b">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="OA_r6">
+          <text>"HIGH"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="loyalty_tier" name="Tier lojalności (staż + historia)">
+    <decisionTable id="DecisionTable_loyalty" hitPolicy="FIRST" preferredOrientation="Rule-as-Row">
+      <input id="Input_months" label="Miesiące jako klient">
+        <inputExpression id="InputExpr_months" typeRef="number">
+          <text>monthsActive</text>
+        </inputExpression>
+      </input>
+      <input id="Input_defaults" label="Liczba wcześniejszych opóźnień">
+        <inputExpression id="InputExpr_defaults" typeRef="number">
+          <text>priorDefaults</text>
+        </inputExpression>
+      </input>
+      <output id="Output_loyalty" label="Tier" name="tier" typeRef="string" />
+      <rule id="Rule_loy_std_bad">
+        <description>Zbyt wiele opóźnień — brak przywilejów</description>
+        <inputEntry id="UL_r1a">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UL_r1b">
+          <text>&gt; 2</text>
+        </inputEntry>
+        <outputEntry id="OL_r1">
+          <text>"STANDARD"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_loy_gold">
+        <inputEntry id="UL_r2a">
+          <text>&gt;= 36</text>
+        </inputEntry>
+        <inputEntry id="UL_r2b">
+          <text>= 0</text>
+        </inputEntry>
+        <outputEntry id="OL_r2">
+          <text>"GOLD"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_loy_silver">
+        <inputEntry id="UL_r3a">
+          <text>&gt;= 12</text>
+        </inputEntry>
+        <inputEntry id="UL_r3b">
+          <text>&lt;= 1</text>
+        </inputEntry>
+        <outputEntry id="OL_r3">
+          <text>"SILVER"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_loy_std">
+        <inputEntry id="UL_r4a">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UL_r4b">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="OL_r4">
+          <text>"STANDARD"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="approval_routing_tree" name="Drzewo decyzji — końcowa trasa obsługi">
+    <variable id="Var_route" name="serviceRoute" typeRef="string" />
+    <informationRequirement id="IR_risk">
+      <requiredDecision href="#risk_level" />
+    </informationRequirement>
+    <informationRequirement id="IR_loyalty">
+      <requiredDecision href="#loyalty_tier" />
+    </informationRequirement>
+    <literalExpression id="Lit_composite">
+      <text>if risk_level.band = "CRITICAL" then "COMPLIANCE_REVIEW" else if risk_level.band = "HIGH" then "MANUAL_UNDERWRITING" else if loyalty_tier.tier = "GOLD" and risk_level.band = "LOW" then "INSTANT_CREDIT" else if loyalty_tier.tier = "GOLD" then "PREFERRED_AUTO" else if loyalty_tier.tier = "SILVER" then "FAST_TRACK" else "RETAIL_STANDARD"</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DRD_complex_tree">
+      <dmndi:DMNShape id="Shape_risk" dmnElementRef="risk_level">
+        <dc:Bounds height="80" width="200" x="160" y="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="Shape_loyalty" dmnElementRef="loyalty_tier">
+        <dc:Bounds height="80" width="200" x="160" y="220" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="Shape_root" dmnElementRef="approval_routing_tree">
+        <dc:Bounds height="80" width="220" x="480" y="150" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

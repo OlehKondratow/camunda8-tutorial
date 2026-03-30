@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_dmn_complex_tree_demo" targetNamespace="http://camunda8.tutorial/schema/bpmn" exporter="camunda8-tutorial" exporterVersion="1.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:process id="c8jw_dmn_complex_tree_demo" name="Demo: złożone DRG DMN (trasa obsługi)" isExecutable="true">
+    <bpmn:documentation>Wymagane zmienne procesu (liczby): **loanAmount**, **creditScore** (0–1000), **monthsActive**, **priorDefaults** (np. 0). DMN: **`dmn/complex-decision-tree.dmn`**, korzeń **`approval_routing_tree`**. Wynik w **serviceRoute** (np. INSTANT_CREDIT, MANUAL_UNDERWRITING). Poddecyzje mają kolumny **band** / **tier** — w korzeniu FEEL: **risk_level.band**, **loyalty_tier.tier**. Wdróż DMN i BPMN; **bindingType latest** lub **deployment** jak w pozostałych przykładach.</bpmn:documentation>
+    <bpmn:startEvent id="Start_dmn_tree" name="Start">
+      <bpmn:outgoing>Flow_to_dmn</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:businessRuleTask id="Task_complex_dmn" name="DMN: approval_routing_tree">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="approval_routing_tree" bindingType="latest" resultVariable="serviceRoute" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_dmn</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_end</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_to_dmn" sourceRef="Start_dmn_tree" targetRef="Task_complex_dmn" />
+    <bpmn:endEvent id="End_dmn_tree" name="Koniec">
+      <bpmn:incoming>Flow_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_to_end" sourceRef="Task_complex_dmn" targetRef="End_dmn_tree" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_dmn_tree">
+    <bpmndi:BPMNPlane id="BPMNPlane_dmn_tree" bpmnElement="c8jw_dmn_complex_tree_demo">
+      <bpmndi:BPMNShape id="Shape_start_tree" bpmnElement="Start_dmn_tree">
+        <dc:Bounds x="152" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_task_dmn" bpmnElement="Task_complex_dmn">
+        <dc:Bounds x="250" y="100" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_tree" bpmnElement="End_dmn_tree">
+        <dc:Bounds x="442" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_to_dmn" bpmnElement="Flow_to_dmn">
+        <di:waypoint x="188" y="140" />
+        <di:waypoint x="250" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_to_end_tree" bpmnElement="Flow_to_end">
+        <di:waypoint x="380" y="140" />
+        <di:waypoint x="442" y="140" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

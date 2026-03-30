@@ -1,0 +1,33 @@
+# Nadpisania Helm dla release camunda-platform (przykład z klastra).
+# Eksport z klastra: ./scripts/fetch-helm-values.sh camunda camunda-platform
+connectors:
+  enabled: false
+elasticsearch:
+  master:
+    persistence:
+      size: 20Gi
+    replicaCount: 1
+global:
+  identity:
+    auth:
+      enabled: false
+  image:
+    tag: 8.6.1
+identity:
+  enabled: false
+identityKeycloak:
+  enabled: false
+keycloak:
+  enabled: false
+operate:
+  enabled: true
+optimize:
+  enabled: false
+tasklist:
+  enabled: true
+zeebe:
+  clusterSize: 1
+  partitionCount: 1
+  persistence:
+    size: 20Gi
+  replicationFactor: 1

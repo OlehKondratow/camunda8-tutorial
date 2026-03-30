@@ -12,9 +12,8 @@ import (
 	zjobs "zeebe-tutorial/internal/zeebe"
 )
 
-// JobTypeDecision matches Camunda Modeler "Task definition → Type" for
-// Service Task «Обработать автоматически» (Reunico / credit-application tutorial).
-const JobTypeDecision = "decision"
+// JobTypeDecision — pole Type w Modeler dla gałęzi „Obsłużyć automatycznie” (Reunico / credit-application tutorial).
+const JobTypeDecision = "c8jw-golang"
 
 type decisionInput struct {
 	Name   string  `json:"name"`

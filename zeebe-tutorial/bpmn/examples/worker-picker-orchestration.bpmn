@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_c8jw_worker_picker" targetNamespace="http://camunda8.tutorial/schema/bpmn" exporter="camunda8-tutorial" exporterVersion="1.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <bpmn:process id="c8jw_worker_form_demo" name="Demo: wybór workera → wykonanie → formularz wyniku" isExecutable="true">
+    <bpmn:documentation>1) Formularz **c8jw_worker_picker**: select **jobType** (`c8jw-python` …) + imię/kwota dla Go. 2) Service Task z **dynamicznym typem** `=jobType` (FEEL). 3) Formularz **c8jw_worker_result**: pola read-only dla typowych zmiennych wyjściowych workerów. Muszą działać workery wybranych typów. **form-log** (`c8jw-python`) zwraca `logged`, `worker`; **Go** — `processed`, `message`, `mode`; **Java** — `fromJava`, `worker`; **echo** — zob. Operate (obiekt `echo`).</bpmn:documentation>
+    <bpmn:startEvent id="Start_wp" name="Start">
+      <bpmn:outgoing>Flow_to_pick</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask_pick_worker" name="Wybór workera">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="c8jw_worker_picker" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_pick</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_run</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_to_pick" sourceRef="Start_wp" targetRef="UserTask_pick_worker" />
+    <bpmn:serviceTask id="Task_dynamic_worker" name="Run worker (=jobType)">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="=jobType" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_run</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_result</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_to_run" sourceRef="UserTask_pick_worker" targetRef="Task_dynamic_worker" />
+    <bpmn:userTask id="UserTask_show_result" name="Wynik workera">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="c8jw_worker_result" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_to_result</bpmn:incoming>
+      <bpmn:outgoing>Flow_to_end</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_to_result" sourceRef="Task_dynamic_worker" targetRef="UserTask_show_result" />
+    <bpmn:endEvent id="End_wp" name="Done">
+      <bpmn:incoming>Flow_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_to_end" sourceRef="UserTask_show_result" targetRef="End_wp" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_wp">
+    <bpmndi:BPMNPlane id="BPMNPlane_wp" bpmnElement="c8jw_worker_form_demo">
+      <bpmndi:BPMNShape id="Shape_Start_wp" bpmnElement="Start_wp">
+        <dc:Bounds x="152" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Pick_wp" bpmnElement="UserTask_pick_worker">
+        <dc:Bounds x="240" y="100" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_wp" bpmnElement="Task_dynamic_worker">
+        <dc:Bounds x="410" y="100" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Result_wp" bpmnElement="UserTask_show_result">
+        <dc:Bounds x="580" y="100" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_wp" bpmnElement="End_wp">
+        <dc:Bounds x="752" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_pick" bpmnElement="Flow_to_pick">
+        <di:waypoint x="188" y="140" />
+        <di:waypoint x="240" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_run" bpmnElement="Flow_to_run">
+        <di:waypoint x="360" y="140" />
+        <di:waypoint x="410" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_result" bpmnElement="Flow_to_result">
+        <di:waypoint x="530" y="140" />
+        <di:waypoint x="580" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_end" bpmnElement="Flow_to_end">
+        <di:waypoint x="700" y="140" />
+        <di:waypoint x="752" y="140" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

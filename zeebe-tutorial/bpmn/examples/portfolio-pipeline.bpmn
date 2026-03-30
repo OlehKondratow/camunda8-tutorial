@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_portfolio_pipeline" targetNamespace="http://camunda8.tutorial/schema/bpmn" exporter="camunda8-tutorial" exporterVersion="1.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0">
+  <bpmn:process id="c8jw-portfolio-pipeline" name="Portfolio: Python → Golang (demo)" isExecutable="true">
+    <bpmn:documentation>Демо для портфолио: два job type подряд. При старте инстанса задайте variables JSON, например: {"name":"Alice","amount":1500} — поле amount нужно Go-воркеру (c8jw-golang).</bpmn:documentation>
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:outgoing>Flow_start_python</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_start_python" sourceRef="StartEvent_1" targetRef="Task_Python" />
+    <bpmn:serviceTask id="Task_Python" name="Greet (c8jw-python)">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="c8jw-python" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_start_python</bpmn:incoming>
+      <bpmn:outgoing>Flow_python_golang</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_python_golang" sourceRef="Task_Python" targetRef="Task_Golang" />
+    <bpmn:serviceTask id="Task_Golang" name="Automatic path (c8jw-golang)">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="c8jw-golang" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_python_golang</bpmn:incoming>
+      <bpmn:outgoing>Flow_golang_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_golang_end" sourceRef="Task_Golang" targetRef="EndEvent_1" />
+    <bpmn:endEvent id="EndEvent_1" name="Done">
+      <bpmn:incoming>Flow_golang_end</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="c8jw-portfolio-pipeline">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="112" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_TaskPython" bpmnElement="Task_Python">
+        <dc:Bounds x="250" y="90" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_TaskGolang" bpmnElement="Task_Golang">
+        <dc:Bounds x="440" y="90" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="EndEvent_1">
+        <dc:Bounds x="642" y="112" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_start_python" bpmnElement="Flow_start_python">
+        <di:waypoint x="188" y="130" />
+        <di:waypoint x="250" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_python_golang" bpmnElement="Flow_python_golang">
+        <di:waypoint x="380" y="130" />
+        <di:waypoint x="440" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_golang_end" bpmnElement="Flow_golang_end">
+        <di:waypoint x="570" y="130" />
+        <di:waypoint x="642" y="130" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

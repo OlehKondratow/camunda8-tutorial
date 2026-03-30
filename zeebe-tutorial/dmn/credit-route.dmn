@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_c8jw_credit_route" name="c8jw credit DRD" namespace="http://camunda8.tutorial/dmn" exporter="camunda8-tutorial" exporterVersion="1.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <decision id="credit_route_decision" name="Trasa wg kwoty (auto vs manual)">
+    <variable id="InformationItem_route" name="creditRoute" typeRef="string" />
+    <literalExpression id="LiteralExpression_route">
+      <text>if amount &lt; 5000 then "auto" else "manual"</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_credit">
+      <dmndi:DMNShape id="DMNShape_credit_route" dmnElementRef="credit_route_decision">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

@@ -1,8 +1,8 @@
 # example-zeebe-worker (Python)
 
-Минимальный **Job Worker** для Camunda 8 (Zeebe), аналог `cmd/example-worker` на Go (каталог `zeebe-tutorial`).
+Minimalny **Job Worker** dla Camunda 8 (Zeebe), odpowiednik `cmd/example-worker` w Go (katalog `zeebe-tutorial`).
 
-## Установка
+## Instalacja
 
 ```bash
 cd camunda8-tutorial/zeebe-tutorial/python/example-zeebe-worker
@@ -11,26 +11,26 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Переменные окружения
+## Zmienne środowiskowe
 
-Те же, что и для Go-воркеров:
+Te same co dla workerów Go:
 
-- `ZEEBE_ADDRESS` — например `127.0.0.1:26500` (локальный Zeebe) или адрес кластера Camunda SaaS.
-- Для **Camunda SaaS**: `ZEEBE_CLIENT_ID`, `ZEEBE_CLIENT_SECRET`, `ZEEBE_AUTHORIZATION_SERVER_URL` (при необходимости).
-- Локально без OAuth: не задавайте client id/secret — в коде ниже для простоты используется plaintext к локальному брокеру; для SaaS включите TLS по документации [pyzeebe](https://github.com/camunda-community-hub/pyzeebe).
+- `ZEEBE_ADDRESS` — np. `127.0.0.1:26500` (lokalny Zeebe) lub adres klastra Camunda SaaS.
+- Dla **Camunda SaaS**: `ZEEBE_CLIENT_ID`, `ZEEBE_CLIENT_SECRET`, `ZEEBE_AUTHORIZATION_SERVER_URL` (gdy potrzebne).
+- Lokalnie bez OAuth: nie ustawiaj client id/secret — w kodzie dla uproszczenia jest plaintext do lokalnego brokera; dla SaaS włącz TLS wg dokumentacji [pyzeebe](https://github.com/camunda-community-hub/pyzeebe).
 
-## Запуск
+## Uruchomienie
 
 ```bash
 export ZEEBE_ADDRESS=127.0.0.1:26500
 python -m app.worker
 ```
 
-Job types:
+Job types (schemat **`c8jw-*`**):
 
-- **`decision`** — сервисная задача «Обработать автоматически» в `application.bpmn` (Reunico), переменные `name`, `amount`.
-- **`example-task`** — `../../bpmn/examples/example-task.bpmn` (относительно этого каталога: `zeebe-tutorial/bpmn/examples/example-task.bpmn`).
+- **`c8jw-golang`** — gałąź „Obsłużyć automatycznie” w `application.bpmn` (Reunico), zmienne `name`, `amount`.
+- **`c8jw-python`** — `../../bpmn/examples/example-task.bpmn`.
 
-## Примечание
+## Uwaga
 
-Для **production** и SaaS лучше доработать конфиг TLS/OAuth по официальным примерам Zeebe Python client. Этот каталог — **учебный минимум**.
+Dla **production** i SaaS lepiej dopracować konfigurację TLS/OAuth wg oficjalnych przykładów klienta Zeebe Python. Ten katalog to **szkoleniowy minimum**.

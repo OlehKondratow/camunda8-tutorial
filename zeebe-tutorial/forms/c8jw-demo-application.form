@@ -1,0 +1,40 @@
+{
+  "components": [
+    {
+      "label": "Imię wnioskodawcy",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_name",
+        "columns": null
+      },
+      "id": "Field_name",
+      "key": "name",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Kwota (jednostki umowne)",
+      "type": "number",
+      "layout": {
+        "row": "Row_amount",
+        "columns": null
+      },
+      "id": "Field_amount",
+      "key": "amount",
+      "validate": {
+        "required": true,
+        "min": 0
+      }
+    }
+  ],
+  "type": "default",
+  "id": "c8jw_demo_application",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "camunda8-tutorial",
+    "version": "1.0.0"
+  },
+  "schemaVersion": 19
+}

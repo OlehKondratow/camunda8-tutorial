@@ -1,0 +1,29 @@
+{
+  "components": [
+    {
+      "label": "Select",
+      "values": [
+        {
+          "label": "Value",
+          "value": "value"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_1oatzlb",
+        "columns": null
+      },
+      "id": "Field_1rjinwr",
+      "key": "select_1yzsol"
+    }
+  ],
+  "type": "default",
+  "id": "Form_3",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "schemaVersion": 19
+}

@@ -1,0 +1,61 @@
+# Obrazy c8jw-* = język = job type (zob. kubernetes/README.md).
+
+substitutions:
+  _REGION: europe-west3
+  _REPO: c8-tutorial-docker
+
+steps:
+  - id: c8jw-python
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python:${BUILD_ID}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python:latest
+      - kubernetes/form-log-worker
+
+  - id: c8jw-golang
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - kubernetes/go-example-worker/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-golang:${BUILD_ID}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-golang:latest
+      - .
+
+  - id: c8jw-python-echo
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python-echo:${BUILD_ID}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python-echo:latest
+      - kubernetes/echo-demo-worker
+
+  - id: c8jw-java
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-java:${BUILD_ID}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-java:latest
+      - kubernetes/java-example-worker
+
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python:${BUILD_ID}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python:latest
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-golang:${BUILD_ID}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-golang:latest
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python-echo:${BUILD_ID}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-python-echo:latest
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-java:${BUILD_ID}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/c8jw-java:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

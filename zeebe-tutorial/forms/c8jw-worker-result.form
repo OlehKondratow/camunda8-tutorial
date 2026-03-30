@@ -1,0 +1,110 @@
+{
+  "components": [
+    {
+      "text": "# Wynik\n\nWartości pochodzą ze **zmiennych procesu** po zakończeniu workera (różne workery wypełniają różne pola).",
+      "type": "text",
+      "layout": {
+        "row": "Row_header",
+        "columns": null
+      },
+      "id": "Text_result_header"
+    },
+    {
+      "label": "Job type (z formularza)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_jt",
+        "columns": null
+      },
+      "id": "Field_jobType_ro",
+      "key": "jobType",
+      "disabled": true
+    },
+    {
+      "label": "Komunikat (message)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_msg",
+        "columns": null
+      },
+      "id": "Field_message",
+      "key": "message",
+      "disabled": true
+    },
+    {
+      "label": "Worker (pole worker)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_worker_field",
+        "columns": null
+      },
+      "id": "Field_worker",
+      "key": "worker",
+      "disabled": true
+    },
+    {
+      "label": "Processed (Go)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_processed",
+        "columns": null
+      },
+      "id": "Field_processed",
+      "key": "processed",
+      "disabled": true
+    },
+    {
+      "label": "Mode (Go)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_mode",
+        "columns": null
+      },
+      "id": "Field_mode",
+      "key": "mode",
+      "disabled": true
+    },
+    {
+      "label": "OK (przykład Python)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_ok",
+        "columns": null
+      },
+      "id": "Field_ok",
+      "key": "ok",
+      "disabled": true
+    },
+    {
+      "label": "Logged (form-log Python)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_logged",
+        "columns": null
+      },
+      "id": "Field_logged",
+      "key": "logged",
+      "disabled": true
+    },
+    {
+      "label": "fromJava",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_fromjava",
+        "columns": null
+      },
+      "id": "Field_fromJava",
+      "key": "fromJava",
+      "disabled": true
+    }
+  ],
+  "type": "default",
+  "id": "c8jw_worker_result",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "camunda8-tutorial",
+    "version": "1.0.0"
+  },
+  "schemaVersion": 19
+}

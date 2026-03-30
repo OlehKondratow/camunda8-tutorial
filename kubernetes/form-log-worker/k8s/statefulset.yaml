@@ -1,0 +1,56 @@
+# Python — job type c8jw-python. Obraz / StatefulSet / app: c8jw-python
+apiVersion: v1
+kind: Service
+metadata:
+  name: c8jw-python-headless
+  namespace: c8-tutorial-workers
+  labels:
+    app: c8jw-python
+spec:
+  clusterIP: None
+  selector:
+    app: c8jw-python
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: c8jw-python
+  namespace: c8-tutorial-workers
+  labels:
+    app: c8jw-python
+    app.kubernetes.io/component: python
+spec:
+  serviceName: c8jw-python-headless
+  replicas: 1
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: c8jw-python
+  template:
+    metadata:
+      labels:
+        app: c8jw-python
+        app.kubernetes.io/component: python
+    spec:
+      containers:
+        - name: worker
+          image: europe-west3-docker.pkg.dev/my-camunda8-project/c8-tutorial-docker/c8jw-python:latest
+          imagePullPolicy: Always
+          env:
+            - name: ZEEBE_ADDRESS
+              value: camunda-platform-zeebe-gateway.camunda.svc.cluster.local:26500
+            - name: JOB_TYPES
+              value: c8jw-python
+            - name: LOG_LEVEL
+              value: INFO
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

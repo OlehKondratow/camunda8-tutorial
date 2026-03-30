@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Сохраняет Helm values релиза Camunda Platform из текущего kube-контекста.
+# Zapisuje wartości Helm release Camunda Platform z bieżącego kontekstu kube.
 #
-# Использование:
+# Użycie:
 #   ./scripts/fetch-helm-values.sh [namespace] [release_name]
-# По умолчанию: namespace=camunda, release=camunda-platform
+# Domyślnie: namespace=camunda, release=camunda-platform
 #
-# Требуется: helm 3, kubectl (контекст на нужный GKE).
+# Wymagane: helm 3, kubectl (kontekst na właściwy GKE).
 
 set -euo pipefail
 
@@ -16,18 +16,18 @@ OUT_DIR="${ROOT}/helm"
 mkdir -p "${OUT_DIR}"
 
 if ! helm status "${REL}" -n "${NS}" >/dev/null 2>&1; then
-  echo "Релиз '${REL}' в namespace '${NS}' не найден. Список релизов:"
+  echo "Release '${REL}' w namespace '${NS}' nie znaleziony. Lista release'ów:"
   helm list -n "${NS}"
   exit 1
 fi
 
-# Только переопределения пользователя (как -f / --set при install).
+# Tylko nadpisania użytkownika (jak -f / --set przy install).
 helm get values "${REL}" -n "${NS}" -o yaml > "${OUT_DIR}/${REL}-user-values.yaml"
 
-# Полная вычисленная конфигурация (defaults чарта + overrides).
+# Pełna obliczona konfiguracja (domyślne chartu + overrides).
 helm get values "${REL}" -n "${NS}" --all -o yaml > "${OUT_DIR}/${REL}-all-values.yaml"
 
-echo "Записано:"
+echo "Zapisano:"
 echo "  ${OUT_DIR}/${REL}-user-values.yaml"
 echo "  ${OUT_DIR}/${REL}-all-values.yaml"
 

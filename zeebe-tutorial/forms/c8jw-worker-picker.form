@@ -1,0 +1,75 @@
+{
+  "components": [
+    {
+      "text": "# Uruchomienie workera\n\nWybierz **job type** — zostanie utworzona jedna service task tego typu. Pola **Imię** i **Kwota** są potrzebne dla **c8jw-golang** (dla pozostałych można zostawić wartości domyślne).",
+      "type": "text",
+      "layout": {
+        "row": "Row_intro",
+        "columns": null
+      },
+      "id": "Text_intro"
+    },
+    {
+      "label": "Worker (job type)",
+      "type": "select",
+      "layout": {
+        "row": "Row_worker",
+        "columns": null
+      },
+      "id": "Field_jobType",
+      "key": "jobType",
+      "validate": {
+        "required": true
+      },
+      "values": [
+        {
+          "label": "Python — form-log (c8jw-python)",
+          "value": "c8jw-python"
+        },
+        {
+          "label": "Go — decyzja (c8jw-golang)",
+          "value": "c8jw-golang"
+        },
+        {
+          "label": "Java demo (c8jw-java)",
+          "value": "c8jw-java"
+        },
+        {
+          "label": "Python echo (c8jw-python-echo)",
+          "value": "c8jw-python-echo"
+        }
+      ]
+    },
+    {
+      "label": "Imię (dla c8jw-golang)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_name",
+        "columns": null
+      },
+      "id": "Field_name",
+      "key": "name",
+      "defaultValue": "Demo"
+    },
+    {
+      "label": "Kwota (dla c8jw-golang)",
+      "type": "number",
+      "layout": {
+        "row": "Row_amount",
+        "columns": null
+      },
+      "id": "Field_amount",
+      "key": "amount",
+      "defaultValue": 1000
+    }
+  ],
+  "type": "default",
+  "id": "c8jw_worker_picker",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "camunda8-tutorial",
+    "version": "1.0.0"
+  },
+  "schemaVersion": 19
+}

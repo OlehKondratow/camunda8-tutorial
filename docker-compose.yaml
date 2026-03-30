@@ -1,11 +1,11 @@
-# Локальный Zeebe + Go и Python воркеры (job types: decision, example-task).
-# Запуск из корня репозитория camunda8-tutorial:
+# Lokalny Zeebe + workery Go i Python (job types: c8jw-golang, c8jw-python).
+# Uruchomienie z katalogu głównego repozytorium camunda8-tutorial:
 #   docker compose up --build
 #   podman-compose -f docker-compose.yaml up --build
 #
 # BPMN: zeebe-tutorial/bpmn/examples/example-task.bpmn (process id: example-task-process).
-# Для удалённого gateway (GKE port-forward на хост): остановите сервис zeebe и задайте
-# ZEEBE_ADDRESS=host.docker.internal:26500 у воркеров (Linux без Docker Desktop — IP хоста).
+# Dla zdalnej bramy (GKE port-forward na host): zatrzymaj serwis zeebe i ustaw
+# ZEEBE_ADDRESS=host.docker.internal:26500 u workerów (Linux bez Docker Desktop — IP hosta).
 
 services:
   zeebe:

@@ -1,18 +1,19 @@
 // Example Zeebe job workers for tutorials:
-//   - decision       — Service Task «Обработать автоматически» (Type = decision) в application.bpmn / Reunico
-//   - example-task   — минимальный процесс bpmn/examples/example-task.bpmn
+//   - c8jw-golang    — Service Task „Obsłużyć automatycznie” (Type = c8jw-golang) w application.bpmn / Reunico
+//   - c8jw-python    — minimalny proces bpmn/examples/example-task.bpmn
 //
-// Запуск (локальный Zeebe):
+// Uruchomienie (lokalny Zeebe):
 //
 //	ZEEBE_ADDRESS=127.0.0.1:26500 go run ./cmd/example-worker
 //
-// Тест с суммой < 5000: переменные процесса { "name": "Elis", "amount": 3000 } — токен попадает на job decision.
+// Test z kwotą < 5000: zmienne { "name": "Elis", "amount": 3000 } — token trafia na job c8jw-golang.
 package main
 
 import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/camunda/zeebe/clients/go/v8/pkg/worker"
@@ -22,6 +23,24 @@ import (
 	"zeebe-tutorial/internal/tutorial"
 	zclient "zeebe-tutorial/internal/zeebe"
 )
+
+func jobTypesFromEnv() []string {
+	raw := strings.TrimSpace(os.Getenv("JOB_TYPES"))
+	if raw == "" {
+		return []string{tutorial.JobTypeDecision, tutorial.JobTypeExampleTask}
+	}
+	var out []string
+	for _, p := range strings.Split(raw, ",") {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	if len(out) == 0 {
+		return []string{tutorial.JobTypeDecision, tutorial.JobTypeExampleTask}
+	}
+	return out
+}
 
 func main() {
 	logger, err := zap.NewDevelopment()
@@ -48,30 +67,36 @@ func main() {
 	decision := tutorial.NewDecisionTask(logger)
 	ex := tutorial.NewExampleTask(logger)
 
+	handlers := map[string]worker.JobHandler{
+		tutorial.JobTypeDecision:    decision.Handle,
+		tutorial.JobTypeExampleTask: ex.Handle,
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	jobs := []struct {
-		jobType string
-		handler worker.JobHandler
-	}{
-		{tutorial.JobTypeDecision, decision.Handle},
-		{tutorial.JobTypeExampleTask, ex.Handle},
-	}
-
+	want := jobTypesFromEnv()
 	var opened []worker.JobWorker
-	for _, j := range jobs {
+	for _, jt := range want {
+		h, ok := handlers[jt]
+		if !ok {
+			logger.Warn("unknown JOB_TYPES entry (ignored)", zap.String("job_type", jt))
+			continue
+		}
 		w := client.NewJobWorker().
-			JobType(j.jobType).
-			Handler(j.handler).
-			Name("example-worker-" + j.jobType).
+			JobType(jt).
+			Handler(h).
+			Name(cfg.WorkerName + "-" + jt).
 			Open()
 		opened = append(opened, w)
-		logger.Info("job worker opened", zap.String("job_type", j.jobType))
+		logger.Info("job worker opened", zap.String("job_type", jt))
+	}
+	if len(opened) == 0 {
+		logger.Fatal("no job workers started — check JOB_TYPES")
 	}
 
 	logger.Info("example-worker running",
-		zap.Strings("job_types", []string{tutorial.JobTypeDecision, tutorial.JobTypeExampleTask}),
+		zap.Strings("job_types", want),
 		zap.String("gateway", cfg.ZeebeAddress),
 	)
 

@@ -8,10 +8,10 @@ import (
 )
 
 // NewClient builds a Zeebe gRPC client from config (OAuth for Camunda SaaS or plaintext for local broker).
-func NewClient(cfg *config.Config) (*zbc.Client, error) {
+func NewClient(cfg *config.Config) (zbc.Client, error) {
 	cc := &zbc.ClientConfig{
-		GatewayAddress: cfg.ZeebeAddress,
-		UsePlaintext:   cfg.LocalPlaintext,
+		GatewayAddress:         cfg.ZeebeAddress,
+		UsePlaintextConnection: cfg.LocalPlaintext,
 	}
 	if cfg.LocalPlaintext && (cfg.ZeebeClientID != "" || cfg.ZeebeClientSecret != "") {
 		return nil, fmt.Errorf("zeebe client: plaintext mode cannot be used with OAuth credentials set")

@@ -1,22 +1,24 @@
-# Helm values с кластера (Camunda Platform)
+# Helm values z klastra (Camunda Platform)
 
-Файлы **`camunda-platform-user-values.yaml`** и **`camunda-platform-all-values.yaml`** получают из активного kube-контекста скриптом:
+W repozytorium może leżeć zacommitowany przykład **`camunda-platform-user-values.yaml`** (ręczna kopia lub szablon startowy). Aktualny zrzut z klastra pobiera skrypt poniżej — **nadpisuje** `*-user-values.yaml` i `*-all-values.yaml`.
+
+Pliki **`camunda-platform-user-values.yaml`** i **`camunda-platform-all-values.yaml`** z aktywnego kontekstu kube:
 
 ```bash
 chmod +x scripts/fetch-helm-values.sh
-kubectl config current-context   # убедитесь, что это ваш GKE
+kubectl config current-context   # upewnij się, że to Twój GKE
 ./scripts/fetch-helm-values.sh camunda camunda-platform
 ```
 
-| Файл | Содержимое |
-|------|------------|
-| `camunda-platform-user-values.yaml` | Только ваши переопределения (`helm get values` без `--all`) |
-| `camunda-platform-all-values.yaml` | Итог после слияния defaults чарта и overrides (`--all`) |
+| Plik | Zawartość |
+|------|-----------|
+| `camunda-platform-user-values.yaml` | Tylko Twoje nadpisania (`helm get values` bez `--all`) |
+| `camunda-platform-all-values.yaml` | Wynik po scaleniu domyślnych chartu i overrides (`--all`) |
 
-Опционально полный манифест релиза (может быть очень большим):
+Opcjonalnie pełny manifest release (może być bardzo duży):
 
 ```bash
 FETCH_MANIFEST=1 ./scripts/fetch-helm-values.sh camunda camunda-platform
 ```
 
-Если имя релиза или namespace другие — передайте их первым и вторым аргументом.
+Jeśli inna nazwa release lub namespace — podaj je jako pierwszy i drugi argument.
